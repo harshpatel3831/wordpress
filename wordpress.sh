@@ -88,7 +88,7 @@ sudo nginx -t
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo unlink /etc/nginx/sites-enabled/default
 #----------------------------Download Wordpress file---------------------------
-echo "----------------------Downloadinf Wordpress file------------------------"
+echo "----------------------Downloading Wordpress file------------------------"
 cd /var/www/
 ls -a | grep "^latest" &> /dev/null
 if [ $? -eq 0 ];
