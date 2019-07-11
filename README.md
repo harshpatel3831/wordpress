@@ -6,8 +6,9 @@ Just run the script : wordpress.sh
 Document root : /var/www/wordpress
 url : http:/example.com
 
-Enter the following value at runtime
+Enter the following value at runtime:
 (1) To install all packages enter "Y" for each packages.
+
 (2) Enter the Domain Name.
 (3) Enter password to set MySQL root password
 (4) Enter database name
