@@ -2,11 +2,10 @@
 ## Introducing a bash script for automated installation of WordPress using LEMP stack.
 
 
-```bash 
-Just run the script : wordpress.sh
-Document root : /var/www/wordpress 
-URL : http://example.com
-Wordpress file : http://wordpress.org/latest.zip
+* Just run the script : wordpress.sh
+* Document root : /var/www/wordpress 
+* URL : http://example.com
+* Wordpress file : http://wordpress.org/latest.zip
 
 Enter the following value at runtime: 
 (1) To install all packages enter "Y" for each packages.
