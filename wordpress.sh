@@ -1,5 +1,6 @@
 #!/bin/bash
 #Author : Harsh Patel
+#Qualification : Bachelor Of Engineer in Computer
 #Date of creation : 11 july 2019
 #------------------------------Package installation----------------------------
 PACKAGES="firewalld nginx mariadb-server mariadb-client php-fpm php-mysql php-curl php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip unzip"
