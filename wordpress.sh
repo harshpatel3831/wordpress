@@ -1,9 +1,12 @@
 #!/bin/bash
 #Author : Harsh Patel
-#Qualification : Bachelor Of Engineer in Computer
+#Qualification : Bachelor Of Computer Engineer
 #Date of creation : 11 july 2019
+#Date of modification : 9 june 2020
+#Installing wordpress using nginx
 #------------------------------Package installation----------------------------
-PACKAGES="firewalld nginx mariadb-server mariadb-client php-fpm php-mysql php-curl php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip unzip"
+PACKAGES="firewalld nginx mariadb-server php php-fpm php-cli php-mysql php-curl php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip unzip php-json"
+
 for i in $PACKAGES;
 do
 	sudo dpkg --status $i | grep "install ok installed" &> /dev/null
@@ -11,14 +14,15 @@ do
 	then
 		echo "$i already installed"
 	else
-		echo "Do you want to install $i "
-		read -p "Y for Yes or N for No : " answer
-		if [ $answer == "Y" ];
-		then
+#uncomment this commands if you want to take permission before installation of packages
+#		echo "Do you want to install $i "
+#		read -p "Y for Yes or N for No : " answer
+#		if [ $answer == "Y" ] || [ $answer == "y" ];
+#		then
 			sudo apt-get install -y $i
-		else
-			exit
-		fi
+#		else
+#			exit
+#		fi
 	fi
 done
 
@@ -35,40 +39,39 @@ fi
 sudo firewall-cmd --list-all
 #-------------------------------get domain name--------------------------------
 
-function jumpto
-{
-    label=$1
-    cmd=$(sed -n "/$label:/{:a;n;p;ba};" $0 | grep -v ':$')
-    eval "$cmd"
-    exit
-}
+get_domain(){
 
-get_domain:
+        echo "Enter the Domain Name : "
+        read domain
 
-echo "Enter the Domain Name : "
-read domain
+	echo "Enter IP address: "
+	read IP
 
-grep "127.0.0.1 $domain" /etc/hosts &> /dev/null
-if [ $? -eq 0 ];
-then
-        echo "Entry for $domain already Exist!!!"
-        echo "Do you want to enter another domain name? "
-        read -p "Y for yes or N for No : " ans
-        if [ $ans == "Y" ];
+        grep "$domain" /etc/hosts &> /dev/null
+
+        if [ $? -eq 0 ];
         then
-          jumpto get_domain
-        fi
+                echo "Entry for $domain already Exist!!!"
+                echo "Do you want to enter another domain name? "
+                read -p "Y for yes or N for No : " ans
+
+                if [ $ans == "Y" ] || [ $ans == "y" ];
+                then
+                        get_domain
+                fi
         else
-        echo "127.0.0.1 $domain" >> /etc/hosts
-fi
+                echo "$IP $domain" >> /etc/hosts
+        fi
+}
+get_domain
 
 #----------------------------Nginx file configuration--------------------------
-
-sudo touch /etc/nginx/sites-available/$domain
+mkdir -p /var/www/$domain
+touch /etc/nginx/sites-available/$domain
 echo " server {
         listen 80;
-        root /var/www/wordpress;
-        index index.php index.html index.htm index.nginx-debian.html;
+        root /var/www/$domain/wordpress;
+        index index.php index.html index.htm;
         server_name $domain;
 
         location / {
@@ -95,16 +98,17 @@ ls -a | grep "^latest" &> /dev/null
 if [ $? -eq 0 ];
 then
         echo " File already exist!!! "
-
 else
-        wget https://wordpress.org/latest.zip
+        wget https://wordpress.org/latest.tar.gz
+#	    wget https://wordpress.org/latest.zip
 fi
 
-echo"---------------------------Extracting file-------------------------------"
+echo "---------------------------Extracting file-------------------------------"
 
-unzip latest.zip
-cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
-sudo chown -R www-data:www-data /var/www/wordpress
+tar -xf latest.tar.gz -C /var/www/$domain
+#unzip latest.zip
+cp /var/www/$domain/wordpress/wp-config-sample.php /var/www/$domain/wordpress/wp-config.php
+sudo chown -R www-data:www-data /var/www/$domain/wordpress
 
 #-------------------------------mysql installation-----------------------------
 echo "-----------------------mysql_secure_installation------------------------"
@@ -135,10 +139,10 @@ GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost';
 EOF
 #----------------------------- wp-config.php edit------------------------------
 echo "--------------database configuration in wp-config.php file-------------"
-sudo perl -pi -e "s/database_name_here/$dbname/g" /var/www/wordpress/wp-config.php
-sudo perl -pi -e "s/username_here/$dbuser/g" /var/www/wordpress/wp-config.php
-sudo perl -pi -e "s/password_here/$dbpass/g" /var/www/wordpress/wp-config.php
-sudo wget -q -O - https://api.wordpress.org/secret-key/1.1/salt/ >> /var/www/wordpress/wp-config.php
+sudo perl -pi -e "s/database_name_here/$dbname/g" /var/www/$domain/wordpress/wp-config.php
+sudo perl -pi -e "s/username_here/$dbuser/g" /var/www/$domain/wordpress/wp-config.php
+sudo perl -pi -e "s/password_here/$dbpass/g" /var/www/$domain/wordpress/wp-config.php
+sudo wget -q -O - https://api.wordpress.org/secret-key/1.1/salt/ >> /var/www/$domain/wordpress/wp-config.php
 #-----------------------------------------------------------------------------
 echo "----------------------restart services----------------------------------"
 sudo systemctl restart nginx
